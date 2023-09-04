@@ -1,0 +1,44 @@
+﻿@page "/events"
+@inject EventApp.Data.Services.EventDataServices EventDataService
+
+<h1>Available Events</h1>
+
+@if (events == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Total Seats</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in events)
+            {
+                <tr>
+                    <td>@e.Id</td>
+                    <td>@e.Name</td>
+                    <td>@e.TotalSeats</td>
+                    <td>
+                        <a href="manageevent/@e.Id" class="btn btn-primary">Manage</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<EventApp.Core.Models.Event> events;
+
+    protected override async Task OnInitializedAsync()
+    {
+        events = (await EventDataService.GetAllEventsAsync()).ToList();
+    }
+}

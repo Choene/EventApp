@@ -1,0 +1,85 @@
+﻿@page "/manageevent/{EventId}"
+@inject EventApp.Data.Services.EventDataServices EventDataService
+@inject NavigationManager NavigationManager
+
+<h2>@(EventId == 0 ? "Create New Event" : "Manage Event")</h2>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (isError)
+{
+    <div class="alert alert-danger">An error occurred while processing your request. Please try again later.</div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <form>
+                <div class="mb-3">
+                    <label for="eventName" class="form-label">Event Name</label>
+                    <input id="eventName" class="form-control" bind="@currentEvent.Name" />
+                </div>
+                <div class="mb-3">
+                    <label for="eventSeats" class="form-label">Total Seats</label>
+                    <input id="eventSeats" class="form-control" type="number" bind="@currentEvent.TotalSeats" />
+                </div>
+                <button type="button" class="btn btn-success" @onclick="SaveEvent">Save</button>
+                @if (EventId != 0)
+                {
+                    <button type="button" class="btn btn-danger" @onclick="DeleteEvent">Delete</button>
+                }
+            </form>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int EventId { get; set; }
+    private EventApp.Core.Models.Event currentEvent = new();
+
+    private bool isLoading = true;
+    private bool isError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (EventId != 0)
+            {
+                currentEvent = await EventDataService.GetEventByIdAsync(EventId);
+            }
+            isError = false;
+        }
+        catch
+        {
+            isError = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveEvent()
+    {
+        if (EventId == 0)
+        {
+            await EventDataService.AddEventAsync(currentEvent);
+        }
+        else
+        {
+            await EventDataService.UpdateEventAsync(currentEvent);
+        }
+        // Redirect to events list after saving
+        NavigationManager.NavigateTo("/events");
+    }
+
+    private async Task DeleteEvent()
+    {
+        await EventDataService.DeleteEventAsync(EventId);
+        // Redirect to events list after deletion
+        NavigationManager.NavigateTo("/events");
+    }
+}
