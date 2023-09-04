@@ -1,9 +1,32 @@
 ﻿@page "/"
+@inject EventApp.Data.Services.EventDataService EventDataService
+@using EventApp.Core.Models
 
-<PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Welcome to EventApp</h1>
+<p>Choose an event to register:</p>
 
-Welcome to your new app.
+@if (events == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var e in events)
+        {
+            <li>
+                <a href="/register/@e.Id">@e.Name</a> (Available Seats: @e.AvailableSeats)
+            </li>
+        }
+    </ul>
+}
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    private IEnumerable<EventApp.Core.Models.Event> events;
+
+    protected override async Task OnInitializedAsync()
+    {
+        events = await EventDataService.GetAllEventsAsync();
+    }
+}

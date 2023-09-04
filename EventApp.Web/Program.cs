@@ -1,6 +1,10 @@
-using EventApp.Web.Data;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Data.Common;
+using EventApp.Data.Services;
+using System.Data.SQLite;
 
 namespace EventApp.Web
 {
@@ -13,7 +17,12 @@ namespace EventApp.Web
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
-            builder.Services.AddSingleton<WeatherForecastService>();
+
+            // DbConnection Service
+            builder.Services.AddScoped<DbConnection>((serviceProvider)=> 
+            { 
+                return new SQLiteConnection("Data Source=eventapp.db"); 
+            });
 
             var app = builder.Build();
 

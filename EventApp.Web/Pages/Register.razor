@@ -1,0 +1,57 @@
+﻿@page "/register/{EventId}"
+@inject EventApp.Data.Services.EventDataService EventDataService
+@inject EventApp.Data.Services.RegistrationService RegistrationService
+
+<h2>Register for Event</h2>
+
+@if (currentEvent == null)
+{
+    <p>Loading...</p>
+}
+else if (currentEvent.AvailableSeats <= 0)
+{
+    <p>Sorry, this event is fully booked.</p>
+}
+else
+{
+    <form @onsubmit="RegisterUser">
+        <!-- Form fields like name, email etc. -->
+        <input type="text" @bind="userName" placeholder="Enter your name" />
+        <input type="email" @bind="userEmail" placeholder="Enter your email" />
+        <button type="submit">Register</button>
+    </form>
+    @if (!string.IsNullOrEmpty(uniqueReferenceNumber))
+    {
+        <p>Successfully registered! Your reference number is @uniqueReferenceNumber</p>
+    }
+}
+
+@code {
+    [Parameter] public int EventId { get; set; }
+    private EventApp.Core.Models.Event currentEvent;
+    private string userName;
+    private string userEmail;
+    private string uniqueReferenceNumber;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentEvent = await EventDataService.GetEventByIdAsync(EventId);
+    }
+
+    private async Task RegisterUser()
+    {
+        var registration = new EventApp.Core.Models.Registration
+            {
+                EventId = EventId,
+                UserName = userName,
+                Email = userEmail,
+                // UniqueReferenceNumber will be generated in RegistrationService
+            };
+
+        uniqueReferenceNumber = await RegistrationService.RegisterUserAsync(registration);
+
+        // Update event's available seats
+        currentEvent.AvailableSeats--;
+        await EventDataService.UpdateEventAsync(currentEvent);
+    }
+}

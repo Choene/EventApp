@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EventApp.Data.Services
 {
-    public class EventDataServices
+    public class EventDataService
     {
         public async Task<int> AddEventAsync(Event newEvent)
         {

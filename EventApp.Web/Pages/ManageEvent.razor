@@ -1,5 +1,5 @@
 ﻿@page "/manageevent/{EventId}"
-@inject EventApp.Data.Services.EventDataServices EventDataService
+@inject EventApp.Data.Services.EventDataService EventDataService
 @inject NavigationManager NavigationManager
 
 <h2>@(EventId == 0 ? "Create New Event" : "Manage Event")</h2>

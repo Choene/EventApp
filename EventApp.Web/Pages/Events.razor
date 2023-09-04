@@ -1,5 +1,5 @@
 ﻿@page "/events"
-@inject EventApp.Data.Services.EventDataServices EventDataService
+@inject EventApp.Data.Services.EventDataService EventDataService
 
 <h1>Available Events</h1>
 
@@ -14,6 +14,7 @@ else
             <tr>
                 <th>ID</th>
                 <th>Name</th>
+                <th>Available Seats</th>
                 <th>Total Seats</th>
                 <th>Actions</th>
             </tr>
@@ -24,6 +25,7 @@ else
                 <tr>
                     <td>@e.Id</td>
                     <td>@e.Name</td>
+                    <td>@e.AvailableSeats</td>
                     <td>@e.TotalSeats</td>
                     <td>
                         <a href="manageevent/@e.Id" class="btn btn-primary">Manage</a>
