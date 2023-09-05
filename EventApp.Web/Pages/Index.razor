@@ -3,7 +3,7 @@
 @using EventApp.Core.Models
 
 
-<h1>Welcome to EventApp</h1>
+<h1>Welcome to Events</h1>
 <p>Choose an event to register:</p>
 
 @if (events == null)
@@ -12,14 +12,27 @@
 }
 else
 {
-    <ul>
+    <div class="row">
         @foreach (var e in events)
         {
-            <li>
-                <a href="/register/@e.Id">@e.Name</a> (Available Seats: @e.AvailableSeats)
-            </li>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@e.Name</h5>
+                        @if (e.AvailableSeats > 0)
+                        {
+                            <p class="card-text">Available Seats: @e.AvailableSeats</p>
+                            <a href="/register/@e.Id" class="btn btn-primary">Register</a>
+                        }
+                        else
+                        {
+                            <p class="card-text">No Available Seats</p>
+                        }
+                    </div>
+                </div>
+            </div>
         }
-    </ul>
+    </div>
 }
 
 @code {

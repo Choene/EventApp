@@ -1,6 +1,9 @@
 ﻿@page "/register/{EventId}"
+@using EventApp.Data.Services;
 @inject EventApp.Data.Services.EventDataService EventDataService
 @inject EventApp.Data.Services.RegistrationService RegistrationService
+@using EventApp.Core.Models
+
 
 <h2>Register for Event</h2>
 
@@ -26,32 +29,72 @@ else
     }
 }
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
 @code {
-    [Parameter] public int EventId { get; set; }
+        [Parameter] 
+        public string EventId { get; set; }
+
+    private int parsedEventId;
     private EventApp.Core.Models.Event currentEvent;
     private string userName;
     private string userEmail;
     private string uniqueReferenceNumber;
+    private string errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        currentEvent = await EventDataService.GetEventByIdAsync(EventId);
+        if (int.TryParse(EventId, out parsedEventId))
+        {
+            currentEvent = await EventDataService.GetEventByIdAsync(parsedEventId);
+        }
+        else
+        {
+            errorMessage = "Please select a valid event to register.";
+        }
     }
 
     private async Task RegisterUser()
     {
-        var registration = new EventApp.Core.Models.Registration
+        if (int.TryParse(EventId, out parsedEventId))
+        {
+            var registration = new EventApp.Core.Models.Registration
+                {
+                    EventId = parsedEventId,
+                    UserName = userName,
+                    Email = userEmail,
+                    // UniqueReferenceNumber will be generated in RegistrationService
+                };
+
+            RegistrationResult result = await RegistrationService.RegisterUserAsync(registration);
+            if (result.IsSuccessful)
             {
-                EventId = EventId,
-                UserName = userName,
-                Email = userEmail,
-                // UniqueReferenceNumber will be generated in RegistrationService
-            };
+                // Handle successful registration
+                string uniqueReferenceNumber = result.UniqueReferenceNumber;
+            }
+            else
+            {
+                // Handle unsuccessful registration
+                string message = result.Message;
+                // Display this message to the user
+            }
 
-        uniqueReferenceNumber = await RegistrationService.RegisterUserAsync(registration);
 
-        // Update event's available seats
-        currentEvent.AvailableSeats--;
-        await EventDataService.UpdateEventAsync(currentEvent);
+            // Update event's available seats
+            if (currentEvent != null)
+            {
+                currentEvent.AvailableSeats--;
+                await EventDataService.UpdateEventAsync(currentEvent);
+            }
+        }
+        else
+        {
+            errorMessage = "Unable to process registration.";
+        }
     }
 }

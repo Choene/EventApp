@@ -1,70 +1,123 @@
-﻿@page "/manageevent/{EventId}"
+﻿@page "/manageevent"
 @inject EventApp.Data.Services.EventDataService EventDataService
 @inject NavigationManager NavigationManager
 
-<h2>@(EventId == 0 ? "Create New Event" : "Manage Event")</h2>
+<h2>Event Manager</h2>
 
-@if (isLoading)
-{
-    <p>Loading...</p>
-}
-else if (isError)
-{
-    <div class="alert alert-danger">An error occurred while processing your request. Please try again later.</div>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-6">
-            <form>
-                <div class="mb-3">
-                    <label for="eventName" class="form-label">Event Name</label>
-                    <input id="eventName" class="form-control" bind="@currentEvent.Name" />
-                </div>
-                <div class="mb-3">
-                    <label for="eventSeats" class="form-label">Total Seats</label>
-                    <input id="eventSeats" class="form-control" type="number" bind="@currentEvent.TotalSeats" />
-                </div>
-                <button type="button" class="btn btn-success" @onclick="SaveEvent">Save</button>
-                @if (EventId != 0)
+
+<!-- Form to Add/Update Events -->
+<div class="row">
+    <div class="col-md-6">
+        <form>
+            <div class="mb-3">
+                <label for="eventName" class="form-label">Add New Event</label>
+                <input id="eventName" class="form-control" @bind="@currentEvent.Name" placeholder="Event Name" />
+            </div>
+            <div class="mb-3">
+                <label for="eventSeats" class="form-label">Total Seats</label>
+                <input id="eventSeats" class="form-control" type="number" @bind="@currentEvent.TotalSeats" />
+            </div>
+            <button type="button" class="btn btn-success" @onclick="SaveEvent">Save</button>
+        </form>
+    </div>
+</div>
+
+
+<!-- Table to Show All Events -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Available Seats</th>
+                    <th>Total Seats</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (events != null)
                 {
-                    <button type="button" class="btn btn-danger" @onclick="DeleteEvent">Delete</button>
+                    @foreach (var evt in events)
+                    {
+                        <tr>
+                            <td>@evt.Id</td>
+                            <td>@evt.Name</td>
+                            <td>@evt.AvailableSeats</td>
+                            <td>@evt.TotalSeats</td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => EditEvent(evt)">Edit</button>
+                                <button class="btn btn-danger" @onclick="() => DeleteEvent(evt.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
                 }
-            </form>
+                else
+                {
+                    <p>No Events Available.</p>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create a Bootstrap modal -->
+@if (showModal)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Event</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="eventName" class="form-label">Event Name</label>
+                    <input class="form-control mb-2" @bind="currentEvent.Name" placeholder="Event Name"/>
+                    <label for="eventSeats" class="form-label">Total Seats</label>
+                    <input class="form-control" type="number" @bind="currentEvent.TotalSeats" placeholder="Total Seats"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="UpdateEventAndCloseModal">Save changes</button>
+                </div>
+            </div>
         </div>
     </div>
 }
 
-@code {
-    [Parameter] public int EventId { get; set; }
-    private EventApp.Core.Models.Event currentEvent = new();
 
-    private bool isLoading = true;
-    private bool isError = false;
+@code {
+
+    private bool showModal = false;
+    private EventApp.Core.Models.Event currentEvent = new();
+    private List<EventApp.Core.Models.Event> events = new();
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            if (EventId != 0)
-            {
-                currentEvent = await EventDataService.GetEventByIdAsync(EventId);
-            }
-            isError = false;
-        }
-        catch
-        {
-            isError = true;
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        await LoadEvents();
+    }
+
+    private async Task LoadEvents()
+    {
+        events = (await EventDataService.GetAllEventsAsync()).ToList();
     }
 
     private async Task SaveEvent()
     {
-        if (EventId == 0)
+        if (string.IsNullOrEmpty(currentEvent.Name) || currentEvent.TotalSeats <= 0)
+        {
+            // Log error message or display alert
+            Console.WriteLine("Event name and total seats must be provided.");
+            return;
+        }
+        // Log error message or display alert
+        Console.WriteLine($"Event Name: {currentEvent.Name}, Total Seats: {currentEvent.TotalSeats}");
+
+
+        if (currentEvent.Id == 0)
         {
             await EventDataService.AddEventAsync(currentEvent);
         }
@@ -72,14 +125,54 @@ else
         {
             await EventDataService.UpdateEventAsync(currentEvent);
         }
-        // Redirect to events list after saving
-        NavigationManager.NavigateTo("/events");
+        currentEvent = new EventApp.Core.Models.Event();
+        await LoadEvents(); 
     }
 
-    private async Task DeleteEvent()
+    //Edit actions
+    private void EditEvent(EventApp.Core.Models.Event evt)
     {
-        await EventDataService.DeleteEventAsync(EventId);
-        // Redirect to events list after deletion
-        NavigationManager.NavigateTo("/events");
+        currentEvent = evt;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        currentEvent = new EventApp.Core.Models.Event();
+    }
+
+    private async Task UpdateEventAndCloseModal()
+    {
+        if (currentEvent.Id != 0)
+        {
+            var oldEvent = await EventDataService.GetEventByIdAsync(currentEvent.Id);
+
+            int bookingsMade = oldEvent.TotalSeats - oldEvent.AvailableSeats;
+
+            currentEvent.AvailableSeats = currentEvent.TotalSeats - bookingsMade;
+
+            if (currentEvent.AvailableSeats < 0)
+            {
+                currentEvent.AvailableSeats = 0;
+            }
+
+            await EventDataService.UpdateEventAsync(currentEvent);
+
+            await LoadEvents();
+        }
+
+        showModal = false;
+        currentEvent = new EventApp.Core.Models.Event();
+    }
+
+
+
+
+
+    private async Task DeleteEvent(int id)
+    {
+        await EventDataService.DeleteEventAsync(id);
+        await LoadEvents();
     }
 }

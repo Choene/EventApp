@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using System.Data.Common;
 using EventApp.Data.Services;
 using System.Data.SQLite;
+using EventApp.Data.Helpers;
 
 namespace EventApp.Web
 {
@@ -17,6 +18,8 @@ namespace EventApp.Web
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
+            builder.Services.AddScoped<EventDataService>();
+            builder.Services.AddScoped<RegistrationService>();
 
             // DbConnection Service
             builder.Services.AddScoped<DbConnection>((serviceProvider)=> 
@@ -25,6 +28,9 @@ namespace EventApp.Web
             });
 
             var app = builder.Build();
+
+            // Initialize the database (this will create tables if they don't exist)
+            DatabaseHelper.InitializeDatabase("Data Source=eventapp.db");
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

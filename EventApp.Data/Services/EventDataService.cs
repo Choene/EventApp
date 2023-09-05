@@ -3,6 +3,7 @@ using EventApp.Core.Models;
 using EventApp.Data.Config;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text;
@@ -16,8 +17,11 @@ namespace EventApp.Data.Services
         {
             using (var connection = new SQLiteConnection(DatabaseConfig.ConnectionString))
             {
-                const string query = "INSERT INTO Events (Name, TotalSeats) VALUES (@Name, @TotalSeats)";
-                return await connection.ExecuteAsync(query, connection);
+                // Set available seats = total seats initially
+                newEvent.AvailableSeats = newEvent.TotalSeats;
+
+                const string query = "INSERT INTO Events (Name, TotalSeats, AvailableSeats) VALUES (@Name, @TotalSeats, @AvailableSeats)";
+                return await connection.ExecuteAsync(query, newEvent);
             }
         }
 
@@ -39,15 +43,15 @@ namespace EventApp.Data.Services
             }
         }
 
-        public async Task<bool> UpdateEventAsync(Event updatedEvent)
+        public async Task UpdateEventAsync(Event updatedEvent)
         {
             using (var connection = new SQLiteConnection(DatabaseConfig.ConnectionString))
             {
-                const string query = "UPDATE Events SET Name = @Name, TotalSeats = @TotalSeats WHERE Id = @Id";
-                var affectedRows = await connection.ExecuteAsync(query, updatedEvent);
-                return affectedRows > 0;
+                const string query = "UPDATE Events SET AvailableSeats = @AvailableSeats WHERE Id = @Id";
+                await connection.ExecuteAsync(query, updatedEvent);
             }
         }
+
 
         public async Task<bool> DeleteEventAsync(int id)
         {

@@ -14,4 +14,11 @@ namespace EventApp.Core.Models
         public string Email { get; set; }
         public string UniqueReferenceNumber { get; set; }
     }
+
+    public class RegistrationResult
+    {
+        public string UniqueReferenceNumber { get; set; }
+        public string Message { get; set; }
+        public bool IsSuccessful { get; set; }
+    }
 }

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventApp.Web", "EventApp.Web\EventApp.Web.csproj", "{8920468C-461F-4C8E-9DBE-EEDF1C1863A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventApp.Web", "EventApp.Web\EventApp.Web.csproj", "{8920468C-461F-4C8E-9DBE-EEDF1C1863A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventApp.Core", "EventApp.Core\EventApp.Core.csproj", "{02EE79B5-248C-49A7-B712-10C3FFE836FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventApp.Core", "EventApp.Core\EventApp.Core.csproj", "{02EE79B5-248C-49A7-B712-10C3FFE836FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventApp.Data", "EventApp.Data\EventApp.Data.csproj", "{F90F0631-FAC0-449C-AE27-5DB2C6161A29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventApp.Data", "EventApp.Data\EventApp.Data.csproj", "{F90F0631-FAC0-449C-AE27-5DB2C6161A29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

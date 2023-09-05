@@ -1,0 +1,50 @@
+﻿@page "/registeredusers"
+@inject EventApp.Data.Services.RegistrationService RegistrationService
+
+<h2>Registered Users</h2>
+
+@if (registrations == null)
+{
+    <p>Loading...</p>
+}
+else if (registrations.Count == 0)
+{
+    <p>No users have registered for events yet.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Event ID</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>Unique Reference Number</th>
+                @*<th>Event</th>*@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var registration in registrations)
+            {
+                <tr>
+                    <td>@registration.Id</td>
+                    <td>@registration.EventId</td>
+                    <td>@registration.UserName</td>
+                    <td>@registration.Email</td>
+                    <td>@registration.UniqueReferenceNumber</td>
+                    @*<td>@registration.EventName</td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<EventApp.Core.Models.Registration> registrations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        registrations = await RegistrationService.GetAllRegistrationsAsync();
+    }
+}
