@@ -24,8 +24,7 @@ namespace EventApp.Data.Services
             // Check for existing registration
             const string checkSql = "SELECT COUNT(*) FROM Registrations WHERE EventId = @EventId AND Email = @Email";
             var count = await _connection.ExecuteScalarAsync<int>(checkSql, new { EventId = registration.EventId, Email = registration.Email });
-            // Log error message or display alert
-            Console.WriteLine($"Event Id: {registration.EventId}, Email Registered: {registration.Email}");
+            
             if (count > 0)
             {
                 // User is already registered for this event.
