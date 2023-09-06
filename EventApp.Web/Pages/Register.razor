@@ -69,7 +69,7 @@ else
             if (isAlreadyRegistered)
             {
                 errorMessage = "You have already registered for this event.";
-                return;  // Exit the method early
+                return;
             }
 
             var registration = new EventApp.Core.Models.Registration
@@ -95,9 +95,7 @@ else
             }
             else
             {
-                // Handle unsuccessful registration
                 errorMessage = result.Message;
-                // Display this message to the user
             }
         }
         else
