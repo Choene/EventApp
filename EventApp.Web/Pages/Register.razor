@@ -63,6 +63,15 @@ else
     {
         if (int.TryParse(EventId, out parsedEventId))
         {
+            // Check if the user has already registered for this event
+            bool isAlreadyRegistered = await RegistrationService.IsUserRegisteredForEventAsync(parsedEventId, userEmail);
+
+            if (isAlreadyRegistered)
+            {
+                errorMessage = "You have already registered for this event.";
+                return;  // Exit the method early
+            }
+
             var registration = new EventApp.Core.Models.Registration
                 {
                     EventId = parsedEventId,
@@ -75,21 +84,20 @@ else
             if (result.IsSuccessful)
             {
                 // Handle successful registration
-                string uniqueReferenceNumber = result.UniqueReferenceNumber;
+                uniqueReferenceNumber = result.UniqueReferenceNumber;
+
+                // Update event's available seats
+                if (currentEvent != null)
+                {
+                    currentEvent.AvailableSeats--;
+                    await EventDataService.UpdateEventAsync(currentEvent);
+                }
             }
             else
             {
                 // Handle unsuccessful registration
-                string message = result.Message;
+                errorMessage = result.Message;
                 // Display this message to the user
-            }
-
-
-            // Update event's available seats
-            if (currentEvent != null)
-            {
-                currentEvent.AvailableSeats--;
-                await EventDataService.UpdateEventAsync(currentEvent);
             }
         }
         else
@@ -97,4 +105,5 @@ else
             errorMessage = "Unable to process registration.";
         }
     }
+
 }
